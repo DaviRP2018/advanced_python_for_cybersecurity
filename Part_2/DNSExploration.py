@@ -1,30 +1,33 @@
+import socket
+
 import dns
 import dns.resolver
-import socket
 
 dictionary = []
 d = "subdomains.txt"
-with open(d,"r") as f:
+with open(d, "r") as f:
     dictionary = f.read().splitlines()
 
 hosts = {}
 
-def ReverseDNS(ip):
+
+def reverse_dns(ip):
     try:
         result = socket.gethostbyaddr(ip)
-        return [result[0]]+result[1]
+        return [result[0]] + result[1]
     except socket.herror:
         return []
 
-def DNSRequest(sub,domain):
+
+def dns_request(sub, domain):
     global hosts
-    hostname = sub+domain
+    hostname = sub + domain
     try:
         result = dns.resolver.resolve(hostname)
         if result:
             for answer in result:
                 ip = answer.to_text()
-                hostnames = ReverseDNS(ip)
+                hostnames = reverse_dns(ip)
                 subs = [sub]
                 for hostname in hostnames:
                     if hostname.endswith(domain):
@@ -32,25 +35,25 @@ def DNSRequest(sub,domain):
                         subs.append(s)
                 if ip in hosts:
                     s = hosts[ip]["subs"]
-                    hosts[ip] = list(dict.fromkeys(s+subs))
+                    hosts[ip] = list(dict.fromkeys(s + subs))
                 else:
                     hosts[ip] = list(dict.fromkeys(subs))
     except:
         return
 
 
-def SubdomainSearch(domain,nums):
-    successes = []
+def subdomain_search(domain, nums):
     for word in dictionary:
-        DNSRequest(word,domain)
+        dns_request(word, domain)
         if nums:
-            for i in range(0,10):
-                DNSRequest(word+str(i),domain)
+            for i in range(0, 10):
+                dns_request(word + str(i), domain)
 
 
-def DNSSearch(domain,nums):
-    SubdomainSearch(domain,nums)
+def dns_search(domain, nums):
+    subdomain_search(domain, nums)
     return hosts
+
 
 """domain = ".google.com"
 hosts = DNSSearch(domain,True)

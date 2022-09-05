@@ -1,10 +1,11 @@
 import shodan
 
-with open("shodan_api.txt","r") as f:
+with open("shodan_api.txt", "r") as f:
     key = f.read()
 api = shodan.Shodan(key)
 
-def queryShodan(query):
+
+def query_shodan(query):
     hosts = {}
     try:
         results = api.search(query)
@@ -14,22 +15,20 @@ def queryShodan(query):
             if ip in hosts:
                 hosts[ip]["ports"] += ports
             else:
-                hosts[ip] = {"ports":ports}
+                hosts[ip] = {"ports": ports}
         return hosts
     except Exception as e:
-        #print("Error %s" % e)
+        # print("Error %s" % e)
         return []
 
-def ShodanLookup(ip):
+
+def shodan_lookup(ip):
     try:
         results = api.host(ip)
         records = []
-        #print(results)
+        # print(results)
         for item in results["data"]:
-            r = {
-                "port":item["port"],
-                "banner": item["data"]
-            }
+            r = {"port": item["port"], "banner": item["data"]}
             if "product" in item:
                 r["product"] = item["product"]
             if "version" in item:
@@ -39,5 +38,5 @@ def ShodanLookup(ip):
             records += [r]
         return records
     except Exception as e:
-        #print(e)
+        # print(e)
         return []
